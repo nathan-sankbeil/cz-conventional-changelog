@@ -12,9 +12,10 @@ var filter = function(array) {
 };
 
 var headerLength = function(answers) {
-  return (
-    answers.type.length + 2 + (answers.scope ? answers.scope.length + 2 : 0)
-  );
+  var type = answers.type.length + 2;
+  var scope = (answers.scope ? answers.scope.length + 2 : 0);
+  var jira = (answers.jira ? answers.jira.length + 1 : 0);
+  return type + scope + jira;
 };
 
 var maxSummaryLength = function(options, answers) {
@@ -85,6 +86,18 @@ module.exports = function(options) {
             return options.disableScopeLowerCase
               ? value.trim()
               : value.trim().toLowerCase();
+          }
+        },
+        {
+          type: 'input',
+          name: 'jira',
+          message:
+            'What is the JIRA ticket associcated with this: (press enter to skip)',
+          default: options.defaultTicket,
+          filter: function(value) {
+            return options.disableJiraUpperCase
+              ? value.trim()
+              : value.trim().toUpperCase();
           }
         },
         {
@@ -199,8 +212,10 @@ module.exports = function(options) {
         // parentheses are only needed when a scope is present
         var scope = answers.scope ? '(' + answers.scope + ')' : '';
 
+        var jiraTicket = answers.jira ? answers.jira + ' ' : '';
+
         // Hard limit this line in the validate
-        var head = answers.type + scope + ': ' + answers.subject;
+        var head = answers.type + scope + ': ' + jiraTicket + answers.subject;
 
         // Wrap these lines at options.maxLineWidth characters
         var body = answers.body ? wrap(answers.body, wrapOptions) : false;
